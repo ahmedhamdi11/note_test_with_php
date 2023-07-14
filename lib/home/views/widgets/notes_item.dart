@@ -80,6 +80,7 @@ class NoteItem extends StatelessWidget {
                       imageUrl:
                           '${ApiServices().baseImagesUrl}${note['note_image']}',
                       height: 75,
+                      width: 75,
                     ),
                   ),
                   Expanded(

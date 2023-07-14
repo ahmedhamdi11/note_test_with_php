@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:notes_with_php_test/home/cubits/update_note_cubit/update_note_cubit.dart';
 import 'package:notes_with_php_test/utils/constants.dart';
 import 'package:notes_with_php_test/utils/functions/check_input_validation.dart';
@@ -19,6 +22,9 @@ class UpdateNoteBody extends StatefulWidget {
 
 class _UpdateNoteBodyState extends State<UpdateNoteBody> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+  ImagePicker picker = ImagePicker();
+  File? imageFile;
 
   late TextEditingController _title;
   late TextEditingController _content;
@@ -72,6 +78,16 @@ class _UpdateNoteBodyState extends State<UpdateNoteBody> {
           const SizedBox(
             height: 22.0,
           ),
+          CustomButton(
+            onPressed: () {
+              showChoseImageOptions(context, updateNoteCubit);
+            },
+            color: updateNoteCubit.image == null ? kPrimaryColor : Colors.green,
+            buttonText: 'Choese note image',
+          ),
+          const SizedBox(
+            height: 12.0,
+          ),
           BlocConsumer<UpdateNoteCubit, UpdateNoteStates>(
             listener: (context, state) {
               if (state is UpdateNoteFailureState) {
@@ -101,10 +117,10 @@ class _UpdateNoteBodyState extends State<UpdateNoteBody> {
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
                       updateNoteCubit.updateNote(
-                        title: _title.text,
-                        content: _content.text,
-                        noteId: widget.note['note_id'],
-                      );
+                          title: _title.text,
+                          content: _content.text,
+                          noteId: widget.note['note_id'],
+                          noteImage: widget.note['note_image']);
                     }
                   },
                   buttonText: 'Update',
@@ -114,6 +130,89 @@ class _UpdateNoteBodyState extends State<UpdateNoteBody> {
           ),
         ],
       ),
+    );
+  }
+
+  popTheBottomSheet() {
+    Navigator.of(context).pop();
+  }
+
+  Future<dynamic> showChoseImageOptions(
+      BuildContext context, UpdateNoteCubit updateNoteCubit) {
+    return showModalBottomSheet(
+      backgroundColor: kSecondaryColor,
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              InkWell(
+                onTap: () async {
+                  XFile? xfile = await picker.pickImage(
+                    source: ImageSource.camera,
+                  );
+                  if (xfile == null) {
+                    imageFile = null;
+                  } else {
+                    imageFile = File(xfile.path);
+                  }
+                  updateNoteCubit.image = imageFile;
+                  setState(() {});
+
+                  popTheBottomSheet();
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.camera_alt),
+                      SizedBox(
+                        width: 22,
+                      ),
+                      Text('CAMERA'),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              InkWell(
+                onTap: () async {
+                  XFile? xfile = await picker.pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  if (xfile == null) {
+                    imageFile = null;
+                  } else {
+                    imageFile = File(xfile.path);
+                  }
+                  updateNoteCubit.image = imageFile;
+                  setState(() {});
+
+                  popTheBottomSheet();
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.photo,
+                      ),
+                      SizedBox(
+                        width: 22,
+                      ),
+                      Text('GALLERY'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
