@@ -71,18 +71,24 @@ class NoteItem extends StatelessWidget {
                   const SizedBox(
                     width: 8.0,
                   ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: CachedNetworkImage(
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      imageUrl:
-                          '${ApiServices().baseImagesUrl}${note['note_image']}',
-                      height: 75,
-                      width: 75,
-                    ),
-                  ),
+                  note['note_image'] != ''
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: CachedNetworkImage(
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            imageUrl:
+                                '${ApiServices().baseImagesUrl}${note['note_image']}',
+                            height: 75,
+                            width: 75,
+                          ),
+                        )
+                      : Image.asset(
+                          'assets/images/logo.png',
+                          height: 75,
+                          width: 75,
+                        ),
                   Expanded(
                     child: ListTile(
                       title: Text(note['note_title']),

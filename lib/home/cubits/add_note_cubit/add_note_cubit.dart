@@ -18,10 +18,21 @@ class AddNoteCubit extends Cubit<AddNoteState> {
 
   addNote(BuildContext context) async {
     if (image == null) {
-      showMySnackBar(
-        context,
-        backgroundColor: Colors.red,
-        content: 'please chose an image for your note!',
+      emit(AddNoteLoadingState());
+
+      var result = await apiServices.post(
+        endPoint: 'notes/add_note.php',
+        data: {
+          'title': title,
+          'content': content,
+          'user_id': prefs.getInt('user_id').toString(),
+          'note_image': '',
+        },
+      );
+
+      result.fold(
+        (l) => emit(AddNoteFailureState(l.errMessage)),
+        (r) => emit(AddNoteSuccessState()),
       );
     } else {
       emit(AddNoteLoadingState());
@@ -32,6 +43,7 @@ class AddNoteCubit extends Cubit<AddNoteState> {
           'title': title,
           'content': content,
           'user_id': prefs.getInt('user_id').toString(),
+          'note_image': '',
         },
         image: image!,
       );
