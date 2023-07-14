@@ -1,9 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:notes_with_php_test/home/cubits/delete_note/add_note_cubit.dart';
 import 'package:notes_with_php_test/home/cubits/get_notes_cubit/get_notes_cubit.dart';
 import 'package:notes_with_php_test/home/views/update_note_view.dart';
+import 'package:notes_with_php_test/utils/api_services.dart';
 import 'package:notes_with_php_test/utils/constants.dart';
 
 class NoteItem extends StatelessWidget {
@@ -29,6 +31,7 @@ class NoteItem extends StatelessWidget {
             onDismissed: () async {
               await deleteNoteCubit.deleteNote(
                 noteId: note['note_id'],
+                noteImage: note['note_image'],
               );
               getNotesCubit.getNotes();
             },
@@ -39,6 +42,7 @@ class NoteItem extends StatelessWidget {
               onPressed: (BuildContext context) async {
                 await deleteNoteCubit.deleteNote(
                   noteId: note['note_id'],
+                  noteImage: note['note_image'],
                 );
                 getNotesCubit.getNotes();
               },
@@ -64,15 +68,21 @@ class NoteItem extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  Expanded(
-                    flex: 1,
-                    child: Image.asset(
-                      'assets/images/logo.png',
+                  const SizedBox(
+                    width: 8.0,
+                  ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: CachedNetworkImage(
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      imageUrl:
+                          '${ApiServices().baseImagesUrl}${note['note_image']}',
                       height: 75,
                     ),
                   ),
                   Expanded(
-                    flex: 3,
                     child: ListTile(
                       title: Text(note['note_title']),
                       subtitle: Text(

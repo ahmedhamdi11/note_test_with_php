@@ -7,15 +7,13 @@ class DeleteNoteCubit extends Cubit<DeleteNoteState> {
   DeleteNoteCubit() : super(DeleteNoteInitial());
   ApiServices apiServices = ApiServices();
 
-  late String title;
-  late String content;
-
-  deleteNote({required int noteId}) async {
+  deleteNote({required int noteId, required String noteImage}) async {
     emit(DeleteNoteLoadingState());
     var result = await apiServices.post(
       endPoint: 'notes/delete_note.php',
       data: {
         'note_id': '$noteId',
+        'image_name': noteImage,
       },
     );
 

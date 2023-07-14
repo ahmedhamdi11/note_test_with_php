@@ -68,7 +68,6 @@ class _LoginViewState extends State<LoginView> {
     prefs.setInt('user_id', id);
     prefs.setString('user_name', userName);
     prefs.setString('email', email);
-    print(id);
   }
 
   _onFailure() {

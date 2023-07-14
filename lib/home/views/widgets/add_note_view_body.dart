@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:notes_with_php_test/utils/constants.dart';
 import 'package:notes_with_php_test/utils/functions/check_input_validation.dart';
 import 'package:notes_with_php_test/utils/functions/show_snack_bar.dart';
@@ -18,6 +21,13 @@ class AddNoteViewBody extends StatefulWidget {
 
 class _AddNoteViewBodyState extends State<AddNoteViewBody> {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  ImagePicker picker = ImagePicker();
+  File? imageFile;
+
+  popTheBottomSheet() {
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     AddNoteCubit addNoteCubit = BlocProvider.of<AddNoteCubit>(context);
@@ -32,7 +42,7 @@ class _AddNoteViewBodyState extends State<AddNoteViewBody> {
               addNoteCubit.title = value;
             },
             validator: (value) {
-              return checkInputValidation(value!, 0, 20);
+              return checkInputValidation(value!, 0, 40);
             },
             hint: 'Note Title',
           ),
@@ -51,6 +61,16 @@ class _AddNoteViewBodyState extends State<AddNoteViewBody> {
           ),
           const SizedBox(
             height: 22.0,
+          ),
+          CustomButton(
+            onPressed: () {
+              showChoseImageOptions(context, addNoteCubit);
+            },
+            color: addNoteCubit.image == null ? kPrimaryColor : Colors.green,
+            buttonText: 'Choese note image',
+          ),
+          const SizedBox(
+            height: 12.0,
           ),
           BlocConsumer<AddNoteCubit, AddNoteState>(
             listener: (context, state) {
@@ -81,7 +101,7 @@ class _AddNoteViewBodyState extends State<AddNoteViewBody> {
                 return CustomButton(
                   onPressed: () {
                     if (formKey.currentState!.validate()) {
-                      addNoteCubit.addNote();
+                      addNoteCubit.addNote(context);
                     }
                   },
                   buttonText: 'Add Note',
@@ -91,6 +111,85 @@ class _AddNoteViewBodyState extends State<AddNoteViewBody> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<dynamic> showChoseImageOptions(
+      BuildContext context, AddNoteCubit addNoteCubit) {
+    return showModalBottomSheet(
+      backgroundColor: kSecondaryColor,
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              InkWell(
+                onTap: () async {
+                  XFile? xfile = await picker.pickImage(
+                    source: ImageSource.camera,
+                  );
+                  if (xfile == null) {
+                    imageFile = null;
+                  } else {
+                    imageFile = File(xfile.path);
+                  }
+                  addNoteCubit.image = imageFile;
+                  setState(() {});
+
+                  popTheBottomSheet();
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.camera_alt),
+                      SizedBox(
+                        width: 22,
+                      ),
+                      Text('CAMERA'),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              InkWell(
+                onTap: () async {
+                  XFile? xfile = await picker.pickImage(
+                    source: ImageSource.gallery,
+                  );
+                  if (xfile == null) {
+                    imageFile = null;
+                  } else {
+                    imageFile = File(xfile.path);
+                  }
+                  addNoteCubit.image = imageFile;
+                  setState(() {});
+
+                  popTheBottomSheet();
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.photo,
+                      ),
+                      SizedBox(
+                        width: 22,
+                      ),
+                      Text('GALLERY'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
